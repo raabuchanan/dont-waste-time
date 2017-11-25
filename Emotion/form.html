@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+input[type=text], select, textarea {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-sizing: border-box;
+    margin-top: 6px;
+    margin-bottom: 16px;
+    resize: vertical;
+}
+
+input[type=submit] {
+    background-color: #4CAF50;
+    color: white;
+    padding: 12px 20px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+input[type=submit]:hover {
+    background-color: #45a049;
+}
+
+.container {
+    border-radius: 5px;
+    background-color: #f2f2f2;
+    padding: 20px;
+}
+</style>
+</head>
+<body>
+
+<h1>Patient Contact Form</h1>
+
+<img src="jeff bezos.jpg" width="300" height="300">
+<div class="container">
+ <form action="/action_page.php">
+<h2>General information</h2>
+<label for="fname"><strong>First Name</strong></label>
+<input type="text" id="fname" name="firstname" placeholder="Patient's first name..">
+
+<label for="lname"><strong>Last Name</strong></label>
+<input type="text" id="lname" name="lastname" placeholder="Patient's last name..">
+
+<label for="gender"><strong>Gender</strong></label>
+<form>
+<input type="radio" name="gender" value="male" checked> Male<br>
+<input type="radio" name="gender" value="female"> Female<br>
+<input type="radio" name="gender" value="other"> Other<br><br>
+</form>
+
+<label for="age"><strong>Age</strong></label>
+<input type="text" id="age" name="age" placeholder="Patient's age..">
+
+<label for="continent"><strong>Continent</strong></label>
+<select id="continent" name="continent">
+	 <option value="Patient's continent">The continent the patient lives in</option>
+     <option value="europe">Europe</option>
+     <option value="north america">North America</option>
+     <option value="south america">South America</option>
+     <option value="oceania">Oceania</option>
+     <option value="asia">Asia</option>
+     <option value="africa">Africa</option>
+
+</select>
+<label for="country"><strong>Country</strong></label>
+<input type="text" id="country" name="country" placeholder="The country the patient lives in..">
+
+<label for="glasses"><strong>Does the patient wear glasses?</strong></label>
+<form>
+<input type="radio" name="glasses" value="yes" checked> Yes<br>
+<input type="radio" name="glasses" value="no"> No<br>	
+<input type="radio" name="glasses" value="prefer not to state"> Prefer not to state<br>
+<form/>	
+	<h2>Address</h2>
+	
+<label for="housenumber"><strong>House Number</strong></label>
+<input type="text" id="housenumber" name="housenumber" placeholder="The patient's house number..">
+<label for="streetname"><strong>Street Name</strong></label>
+<input type="text" id="streetname" name="streetname" placeholder="The patient's street name..">
+<label for="city"><strong>Town</strong></label>
+<input type="text" id="town" name="town" placeholder="The town the patient lives in..">
+<label for="postcode"><strong>Postcode</strong></label>
+<input type="text" id="postcode" name="postcode" placeholder="The patient's postcode..">
+		
+	
+	<label for="problem with the patient"><strong>Problem with the patient</strong></label>
+    <textarea id="subject" name="subject" placeholder="Write something.." style="height:200px"></textarea>
+	<label for="prescription"><strong>Prescription for patient</strong></label>
+    <textarea id="subject" name="subject" placeholder="Write something.." style="height:200px"></textarea>
+    <input type="submit" value="Submit">
+  </form>
+</div>
+
+</body>
+</html>
