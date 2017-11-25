@@ -1,0 +1,62 @@
+@font-face {
+    font-family: 'Roboto';
+    src: url(fonts/roboto/Roboto-Regular.ttf);
+    font-style: normal;
+    font-weight: normal;
+}
+
+body {
+    background-color: #ffffff;
+    font-family: 'Roboto';
+}
+
+div {
+    font-family: 'Roboto';
+}
+
+h1 {
+    text-align: center;
+    font-size: 550% !important;
+}
+
+.navbar {
+  margin-bottom: 0;
+  border-radius: 0;
+  background-color: #111111
+}
+
+.navbar-collapse > ul > li {
+    background-color: #111111
+}
+
+.navbar-brand {
+    width: 100%;
+    height: 100%;
+}
+
+.navbar-nav > li > a {
+    height: 100%;
+    margin-top: 10px;
+}
+
+@media screen and (max-width: 767px) {
+  .sidenav {
+    height: auto;
+    padding: 15px;
+  }
+  .row.content {height:auto;} 
+}
+
+div.sub, iframe {
+    width: 800px;
+    height: 600px;
+    margin: 0 auto;
+    background-color: #777;
+
+}
+
+footer {
+  background-color: #ffffff;
+  color: 111111;
+  padding: 15px;
+}

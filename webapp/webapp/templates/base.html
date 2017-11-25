@@ -1,0 +1,29 @@
+{% extends "bootstrap/base.html" %}
+{% import "bootstrap/fixes.html" as fixes %}
+{% import "bootstrap/utils.html" as util %}
+
+{% block title %}Poker Night{% endblock %}
+
+{% block head %}
+{{super()}}
+{{fixes.ie8()}}
+
+<link rel="icon" type="image/png" href="{{ url_for('static', filename='images/favicon.ico') }}" sizes="32x32">
+
+{% endblock %}
+
+{% block styles -%}
+    {{super()}}
+    <link rel="stylesheet" type="text/css"
+          href="{{url_for('static', filename='webapp.css')}}">
+{% endblock %}
+
+
+{% block scripts %}
+{{super()}}
+
+
+
+<script src="{{ url_for('static', filename='webapp.js') }}"></script>
+
+{% endblock %}
