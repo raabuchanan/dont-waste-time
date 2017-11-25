@@ -6,17 +6,20 @@ import numpy as np
 import cv2
 import argparse
 
+import os
+
 
 subscription_id = '69766cdb74e748cd9266eb53fae6316f'
 
 personGroupId = 'patients'
 
+our_database = []
+
+
 class FaceMatcher:
 
 
     def __init__ (self):
-        self.personId = ""
-
         self.headers = {
             'Content-Type': 'application/json',
             'Ocp-Apim-Subscription-Key': subscription_id,
@@ -41,27 +44,31 @@ class FaceMatcher:
         print("Deleting Group: %s" % response.reason)
 
 
-    def add_person(self):
+    def add_person(self, filename):
         conn = httplib.HTTPSConnection('westcentralus.api.cognitive.microsoft.com')
-        body = "{ 'name':'Russell', 'userData':'test'}"
+        body = "{ 'name':'%s', 'userData':'test'}" % filename
         conn.request("POST", "/face/v1.0/persongroups/%s/persons?" % personGroupId, body, self.headers)
-        time.sleep(1)
         response = conn.getresponse()
         data = json.loads(response.read())
-        self.personId = str(data['personId'])
+        personId = str(data['personId'])
+
+
         conn.close()
         print("Adding Person: %s" % response.reason)
 
+        return personId
 
-    def add_picture(self):
+
+    def add_picture(self, picture, personId):
         conn = httplib.HTTPSConnection('westcentralus.api.cognitive.microsoft.com')
         self.headers['Content-Type'] = 'application/octet-stream'
-        filename = 'image.jpg'
+        print(picture)
+        filename = picture
         f = open(filename, "rb")
         body = f.read()
         f.close()
 
-        conn.request("POST", "/face/v1.0/persongroups/%s/persons/%s/persistedFaces?" % (personGroupId, self.personId), body, self.headers)
+        conn.request("POST", "/face/v1.0/persongroups/%s/persons/%s/persistedFaces?" % (personGroupId, personId), body, self.headers)
         response = conn.getresponse("")
         data = json.loads(response.read())
         self.headers['Content-Type'] = 'application/json'
@@ -100,7 +107,12 @@ class FaceMatcher:
         conn.request("POST", "/face/v1.0/detect?%s" % params, body, self.headers)
         response = conn.getresponse()
         data = json.loads(response.read())
-        faceID = data[0]['faceId']
+
+        if 'faceId' not in data[0]:
+            print(data)
+        else:
+            print(data)
+            faceId = data[0]['faceId']
 
         self.headers['Content-Type'] = 'application/json'
 
@@ -112,19 +124,41 @@ class FaceMatcher:
         body = str({
 
             "personGroupId":str(personGroupId),
-            "faceIds":[str(faceID)],
-            "maxNumOfCandidatesReturned":1,
-            "confidenceThreshold": 0.5
+            "faceIds":[str(faceId)],
+            "maxNumOfCandidatesReturned":5,
+            "confidenceThreshold": 0
 
         })
 
         conn.request("POST", "/face/v1.0/identify?%s" % params, body, self.headers)
         response = conn.getresponse()
-        data = response.read()
+        data = json.loads(response.read())
         print(data)
 
-
         conn.close()
+
+        if(len(data[0]['candidates']) > 0):
+
+            for candidate in data[0]['candidates']:
+                personId = candidate['personId']
+
+                indir = '/home/raab/DontWasteTIme/files'
+                for root, dirs, filenames in os.walk(indir):
+
+                    for filename in filenames:
+
+                        with open(os.path.join(root,filename)) as fd:
+                            medical_data = json.load(fd)
+
+                        
+                        if personId == medical_data['personID']:
+
+                            name = filename.split('.')[0]
+
+                            print("Found Match: %s, %s" % (name, candidate['confidence']))
+        else:
+            print("No Match")
+
 
 
 
@@ -141,7 +175,41 @@ if __name__ == "__main__":
     matcher = FaceMatcher()
 
 
-    if args.demo:
+    if args.train:
+        matcher.delete_group()
+        matcher.create_group()
+
+
+        indir = '/home/raab/DontWasteTIme/files'
+        for root, dirs, filenames in os.walk(indir):
+
+
+            for filename in filenames:
+                print(filename)
+
+                with open(os.path.join(root,filename)) as fd:
+                    medical_data = json.load(fd)
+
+                name = filename.split('.')[0]
+                personId = matcher.add_person(name)
+
+                matcher.add_picture('../images/' + name + '1.jpg', personId)
+                matcher.add_picture('../images/' + name + '2.jpg', personId)
+                matcher.add_picture('../images/' + name + '3.jpg', personId)
+
+
+                medical_data['personID'] = personId
+
+
+
+                with open(os.path.join(root,filename), 'w') as outfile:
+                    json.dump(medical_data, outfile)
+
+
+        matcher.train_group()
+
+    else:
+
 
         cap = cv2.VideoCapture(0)
 
@@ -151,52 +219,68 @@ if __name__ == "__main__":
 
         cv2.imwrite( "image.jpg", frame );
 
-            # np_frame = np.asarray(frame)
-            # print(np.shape)
-
-            # # Display the resulting frame
-            # cv2.imshow('frame',frame)
-            # if cv2.waitKey(1000) & 0xFF == ord('q'):
-            #     break
-
-        # When everything done, release the capture
+        
         cap.release()
         cv2.destroyAllWindows()
 
         matcher.analyze_image()
 
-    elif args.train:
+
+    # if args.demo:
+
+    #     cap = cv2.VideoCapture(0)
+
+    #     # while(True):
+    #         # Capture frame-by-frame
+    #     ret, frame = cap.read()
+
+    #     cv2.imwrite( "image.jpg", frame );
+
+    #         # np_frame = np.asarray(frame)
+    #         # print(np.shape)
+
+    #         # # Display the resulting frame
+    #         # cv2.imshow('frame',frame)
+    #         # if cv2.waitKey(1000) & 0xFF == ord('q'):
+    #         #     break
+
+    #     # When everything done, release the capture
+    #     cap.release()
+    #     cv2.destroyAllWindows()
+
+    #     matcher.analyze_image()
+
+    # elif args.train:
 
 
 
     
 
-        matcher.delete_group()
-        matcher.create_group()
+    #     matcher.delete_group()
+    #     matcher.create_group()
 
-        matcher.add_person()
+    #     matcher.add_person()
 
-        matcher.add_picture()
-
-
-        matcher.train_group()
-
-    
+    #     matcher.add_picture()
 
 
-    else:
-
+    #     matcher.train_group()
 
     
 
-        matcher.delete_group()
-        matcher.create_group()
 
-        matcher.add_person()
-
-        matcher.add_picture()
+    # else:
 
 
-        matcher.train_group()
+    
 
-        matcher.analyze_image()
+    #     matcher.delete_group()
+    #     matcher.create_group()
+
+    #     matcher.add_person()
+    #     matcher.add_picture()
+
+
+    #     matcher.train_group()
+
+    #     matcher.analyze_image()
