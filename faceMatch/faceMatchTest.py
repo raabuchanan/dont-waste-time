@@ -1,7 +1,5 @@
 import httplib, urllib, base64, json
 
-import numpy as np
-
 import time
 
 headers = {
