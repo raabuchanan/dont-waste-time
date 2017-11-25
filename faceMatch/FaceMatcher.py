@@ -2,6 +2,10 @@
 
 import httplib, urllib, base64, json
 import time
+import numpy as np
+import cv2
+import argparse
+
 
 subscription_id = '69766cdb74e748cd9266eb53fae6316f'
 
@@ -52,7 +56,7 @@ class FaceMatcher:
     def add_picture(self):
         conn = httplib.HTTPSConnection('westcentralus.api.cognitive.microsoft.com')
         self.headers['Content-Type'] = 'application/octet-stream'
-        filename = '/home/raab/russell1.jpg'
+        filename = 'image.jpg'
         f = open(filename, "rb")
         body = f.read()
         f.close()
@@ -87,7 +91,7 @@ class FaceMatcher:
         })
 
         self.headers['Content-Type'] = 'application/octet-stream'
-        filename = '/home/raab/russell1.jpg'
+        filename = 'image.jpg'
         f = open(filename, "rb")
         body = f.read()
         f.close()
@@ -127,17 +131,72 @@ class FaceMatcher:
 if __name__ == "__main__":
     
 
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--demo', action='store_true')
+    parser.add_argument('--train', action='store_true')
+    args = parser.parse_args()
+
+
     matcher = FaceMatcher()
 
 
-    matcher.delete_group()
-    matcher.create_group()
+    if args.demo:
 
-    matcher.add_person()
+        cap = cv2.VideoCapture(0)
 
-    matcher.add_picture()
+        # while(True):
+            # Capture frame-by-frame
+        ret, frame = cap.read()
+
+        cv2.imwrite( "image.jpg", frame );
+
+            # np_frame = np.asarray(frame)
+            # print(np.shape)
+
+            # # Display the resulting frame
+            # cv2.imshow('frame',frame)
+            # if cv2.waitKey(1000) & 0xFF == ord('q'):
+            #     break
+
+        # When everything done, release the capture
+        cap.release()
+        cv2.destroyAllWindows()
+
+        matcher.analyze_image()
+
+    elif args.train:
 
 
-    matcher.train_group()
 
-    matcher.analyze_image()
+    
+
+        matcher.delete_group()
+        matcher.create_group()
+
+        matcher.add_person()
+
+        matcher.add_picture()
+
+
+        matcher.train_group()
+
+    
+
+
+    else:
+
+
+    
+
+        matcher.delete_group()
+        matcher.create_group()
+
+        matcher.add_person()
+
+        matcher.add_picture()
+
+
+        matcher.train_group()
+
+        matcher.analyze_image()
