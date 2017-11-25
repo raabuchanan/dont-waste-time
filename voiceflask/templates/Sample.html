@@ -16,7 +16,7 @@
         </tr>
         <tr>
             <td align="right"><a href="https://www.microsoft.com/cognitive-services/en-us/sign-up" target="_blank">Subscription</a>:</td>
-            <td><input id="key" type="text" size="40" value="YOUR_BING_SPEECH_API_KEY"></td>
+            <td><input id="key" type="text" size="40" value="KEY"></td>
         </tr>
         <tr>
             <td align="right">Language:</td>
@@ -97,7 +97,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.3/require.min.js"></script>
 
     <!-- SDK REFERENCE -->
-    <script src="../../distrib/speech.browser.sdk.js"></script>
+    <script src="static/distrib/speech.browser.sdk.js"></script>
 
     <!-- SDK USAGE -->
     <script>
@@ -263,7 +263,7 @@
             recognitionMode.addEventListener("change", Setup);
 
             startBtn.addEventListener("click", function () {
-                if (key.value == "" || key.value == "YOUR_BING_SPEECH_API_KEY") {
+                if (key.value == "" || key.value == "KEY") {
                     alert("Please enter your Bing Speech subscription key!");
                     return;
                 }
@@ -284,14 +284,14 @@
             });
 
             key.addEventListener("focus", function () {
-               if (key.value == "YOUR_BING_SPEECH_API_KEY") {
+               if (key.value == "KEY") {
                    key.value = "";
                }
             });
 
             key.addEventListener("focusout", function () {
                if (key.value == "") {
-                   key.value = "YOUR_BING_SPEECH_API_KEY";
+                   key.value = "KEY";
                }
             });
 
@@ -354,6 +354,28 @@
             stopBtn.disabled = true;
         }
     </script>
+<script>
+function myfunc() {
+    var st = $("#phraseDiv").text();
+    st = "["+st.replace(/}\n{/g,"},\n{")+"]";
+    $.ajax({url: "http://localhost:8000",
+        type: "POST",
+        data: JSON.stringify($.parseJSON(st)),
+        contentType: "application/json; charset=utf-8",
+        dataType: "JSON"});
+}
+
+window.setInterval(function(){myfunc()}, 1000);
+
+function reset() {
+    $.ajax({url: "http://localhost:8000/reset",
+        type: "POST",
+        dataType: "JSON"});
+}
+
+var but = document.getElementById('startBtn');
+but.addEventListener("click", reset);
+</script>
 </body>
 </html>
 
