@@ -1,21 +1,28 @@
-#!/usr/bin/env python
+from flask import Flask, jsonify, session
+from flask import render_template, request, redirect, url_for
 
 import httplib, urllib, base64, json
 import time
 import numpy as np
 import cv2
 import argparse
-
+import operator
 import os
 
 
 subscription_id = '78836ad0eb164298ac473d98449a1c43'
 #subscription_id = '69766cdb74e748cd9266eb53fae6316f'
-
+image = "static/images/default.jpg"
 personGroupId = 'patients'
 
 our_database = []
 
+detected_emotions = {}
+glasses = ""
+detected_age = ""
+detected_gender = ""
+health_care_provider = ""
+uuid = ""
 
 class FaceMatcher:
 
@@ -90,6 +97,7 @@ class FaceMatcher:
 
 
     def analyze_image(self):
+        global image, detected_emotions, glasses, detected_age, detected_gender, health_care_provider, uuid
         conn = httplib.HTTPSConnection('westeurope.api.cognitive.microsoft.com')
 
         params = urllib.urlencode({
@@ -99,7 +107,7 @@ class FaceMatcher:
         })
 
         self.headers['Content-Type'] = 'application/octet-stream'
-        filename = 'image.jpg'
+        filename = 'static/image.jpg'
         f = open(filename, "rb")
         body = f.read()
         f.close()
@@ -112,38 +120,45 @@ class FaceMatcher:
         if 'faceId' not in data[0]:
             print(data)
         else:
-            print(data)
             faceId = data[0]['faceId']
+
+        detected_age = data[0]['faceAttributes']['age']
+        detected_gender = data[0]['faceAttributes']['gender']
+
+        glasses = data[0]['faceAttributes']['glasses']
+
+        detected_emotions = data[0]['faceAttributes']['emotion']
+
+        
 
         self.headers['Content-Type'] = 'application/json'
 
 
 
-        params = urllib.urlencode({
-        })
+        params = urllib.urlencode({})
 
         body = str({
 
             "personGroupId":str(personGroupId),
             "faceIds":[str(faceId)],
-            "maxNumOfCandidatesReturned":3,
-            "confidenceThreshold": 0
+            "maxNumOfCandidatesReturned":1,
+            "confidenceThreshold": 0.5
 
         })
 
         conn.request("POST", "/face/v1.0/identify?%s" % params, body, self.headers)
         response = conn.getresponse()
         data = json.loads(response.read())
-        print(data)
 
         conn.close()
 
+        print(data)
         if(len(data[0]['candidates']) > 0):
 
             for candidate in data[0]['candidates']:
                 personId = candidate['personId']
 
-                indir = '/home/raab/DontWasteTIme/files'
+                indir = '/home/raab/DontWasteTIme/voiceflask/static/files'
                 for root, dirs, filenames in os.walk(indir):
 
                     for filename in filenames:
@@ -157,14 +172,69 @@ class FaceMatcher:
                             name = filename.split('.')[0]
 
                             print("Found Match: %s, %s" % (name, candidate['confidence']))
+
+                            image = "static/images/" + name + "1.jpg"
+
+                            health_care_provider = medical_data['entry'][0]['resource']['name']
+
+                            uuid = medical_data['entry'][0]['resource']['id']
+
         else:
             print("No Match")
 
 
+        if health_care_provider == "":
+            health_care_provider = "NO RECORD FOUND"
 
+        if uuid == "":
+            uuid = "NO RECORD FOUND"
+
+
+app = Flask(__name__, static_url_path='/static')
+
+@app.route("/c/", methods=['GET'])
+def search():
+    keyword = request.args.get('q')
+    keyword = clean_keyword(keyword)
+    page = request.args.get('p')
+
+@app.route("/", methods=['GET'])
+def home():
+    global image, detected_emotions, glasses, detected_age, detected_gender, health_care_provider, uuid
+    
+    return render_template("Sample.html", image=image, detected_emotions=detected_emotions, glasses=glasses,detected_age=detected_age,
+detected_gender=detected_gender,health_care_provider=health_care_provider, uuid=uuid)
+
+@app.route("/reset", methods=['POST'])
+def reset():
+    print "reset!"
+    last_offset = 0
+    return 
+
+last_offset = 0
+recording = False
+
+@app.route("/", methods=['POST'])
+def receive():
+    global recording
+    global last_offset
+
+    j = request.get_json()
+    for i in j:
+        if i['Offset'] > last_offset and 'DisplayText' in i:
+            dt = i['DisplayText']
+            if dt == "Start.":
+                recording = True
+                print "start recording..."
+            elif dt == "Stop.":
+                recording = False
+                print "stop recording..."
+            if recording:
+                print dt
+            last_offset = i['Offset']
+    return render_template("Sample.html")
 
 if __name__ == "__main__":
-    
 
 
     parser = argparse.ArgumentParser()
@@ -181,7 +251,7 @@ if __name__ == "__main__":
         matcher.create_group()
 
 
-        indir = '/home/raab/DontWasteTIme/files'
+        indir = '/home/raab/DontWasteTIme/voiceflask/static/files'
         for root, dirs, filenames in os.walk(indir):
 
 
@@ -194,9 +264,9 @@ if __name__ == "__main__":
                 name = filename.split('.')[0]
                 personId = matcher.add_person(name)
 
-                matcher.add_picture('../images/' + name + '1.jpg', personId)
-                matcher.add_picture('../images/' + name + '2.jpg', personId)
-                matcher.add_picture('../images/' + name + '3.jpg', personId)
+                matcher.add_picture('static/images/' + name + '1.jpg', personId)
+                matcher.add_picture('static/images/' + name + '2.jpg', personId)
+                matcher.add_picture('static/images/' + name + '3.jpg', personId)
 
 
                 medical_data['personID'] = personId
@@ -216,10 +286,15 @@ if __name__ == "__main__":
 
         ret, frame = cap.read()
 
-        cv2.imwrite( "image.jpg", frame );
+        cv2.imwrite( "static/image.jpg", frame );
 
         
         cap.release()
         cv2.destroyAllWindows()
 
         matcher.analyze_image()
+
+
+        app.run(host='0.0.0.0', port=80, debug=True)
+
+

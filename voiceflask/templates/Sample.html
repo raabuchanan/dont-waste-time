@@ -1,15 +1,98 @@
-{% extends "base.html" %}
-
-{% block content %}
-
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Speech Sample</title>
+    <title>Don't Waste Time</title>
     <meta charset="utf-8" />
 </head>
 <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js" type="text/jscript" ></script>
 <body style="font-family:'Helvetica Neue',Helvetica,Arial,sans-serif; font-size:13px;">
+
+
+    <img src='static/images/logo.png' alt="Mountain View" style="width:100px;height:100px; float:left">
+<br>
+    <h1>Don't Waste Time Medical Records</h1>
+
+    <table width="100%">
+        
+        <tr>
+            <td></td>
+            <td>
+                <button id="startBtn" disabled="disabled">Start</button>
+                <button id="stopBtn" disabled="disabled">Stop</button>
+            </td>
+        </tr>
+
+    </table>
+
+
+    <div class="image123">
+
+        <div class="imgContainer" style="float:right">
+            <p style="margin-top: 0px"><font size="5">Image taken on<br> November 26, 2017</font></p>
+            <img src='static/image.jpg' alt="Mountain View" style="width:200px;height:200px;margin-right: 50px">
+            
+        </div>
+
+        <div class="imgContainer" style="float:right">
+            <p style=" ;margin-bottom: 0px"> <font size="5">Image on File</font> </p>
+            <img src='{{ image }}' alt="Mountain View" style="width:200px;height:200px;margin-right: 50px; margin-top: 25px">
+            
+        </div>
+
+    </div>
+
+
+
+<!-- 
+    <figure>
+    <img src='{{ image }}' alt="Mountain View" style="float: left;width:200px;height:200px;margin-right: 50px">
+    <figcaption>Image on File</figcaption>
+    </figure>
+
+    <figure>
+    <img src='static/image.jpg' alt="Mountain View" style="float: left;width:200px;height:200px;">
+    <figcaption>Image taken on <br>November 26, 2017</figcaption>
+    </figure> -->
+    
+    <form action="/action_page.php" style="margin-bottom: 1000px">
+      <font size="4"><b>First name:</b></font><br>
+      <input id="FirstName" type="text" name="firstname" value="">
+      <br>
+      <font size="4"><b>Last name:</b></font><br>
+      <input id="LastName" type="text" name="lastname" value="">
+      <br>
+      <font size="4"><b>Age:</b></font><br>
+      <input id="Age" type="text" name="age" value="Detected Age: {{ detected_age }}">
+
+      <br>
+      <font size="4"><b>Sex:</b></font><br>
+      <input id="Sex" type="text" name="age" value="Detected Sex: {{ detected_gender }}">
+
+      <br>
+      <font size="4"><b>Healthcare Provider:</b></font><br>
+      <input id="Provider" type="text" name="provider" value="{{ health_care_provider }}">
+
+      <br>
+      <font size="4"><b>Record ID:</b></font><br>
+      <input id="uuid" type="text" name="uuid" value="{{ uuid }}">
+
+      <br>
+
+      <font size="4"><b>Detected Emotions:</b></font><br>
+      <textarea id="Emotinos" style="display: inline-block;width:159px;height:127px" value="{{ detected_emotions }}">"{{ detected_emotions }}"</textarea>
+<!--       <input id="Emotinos" type="text" name="emotions" value="{{ detected_emotions }}"> -->
+      
+        <br>
+      <font size="4"><b>Glasses?:</b></font><br>
+      <input id="Glasses" type="text" name="glasses" value="{{ glasses }}">
+
+      
+      <br><br>
+      <input type="submit" value="Submit">
+    </form> 
+
+
+
     <table width="100%">
         <tr>
             <td></td>
@@ -20,7 +103,7 @@
         </tr>
         <tr>
             <td align="right"><a href="https://www.microsoft.com/cognitive-services/en-us/sign-up" target="_blank">Subscription</a>:</td>
-            <td><input id="key" type="text" size="40" value="YOUR_BING_SPEECH_API_KEY"></td>
+            <td><input id="key" type="text" size="40" value="3d911de892fa47a284de5fc78b033bba"></td>
         </tr>
         <tr>
             <td align="right">Language:</td>
@@ -42,7 +125,7 @@
                 <select id="recognitionMode">
                     <option value="Interactive">Interactive</option>
                     <option value="Conversation">Conversation</option>
-                    <option value="Dictation">Dictation</option>
+                    <option value="Dictation" selected="selected">Dictation</option>
                 </select>
             </td>
         </tr>
@@ -100,8 +183,12 @@
     <!-- The SDK has a dependency on requirejs (http://requirejs.org/). -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.3/require.min.js"></script>
 
+        <link rel="stylesheet" type="text/css"
+          href="{{url_for('static', filename='webapp.css')}}">
+
     <!-- SDK REFERENCE -->
-    <script src="../../distrib/speech.browser.sdk.js"></script>
+    <script src="static/distrib/speech.browser.sdk.js"></script>
+    <script src="static/distrib/dwt.js"></script>
 
     <!-- SDK USAGE -->
     <script>
@@ -267,7 +354,7 @@
             recognitionMode.addEventListener("change", Setup);
 
             startBtn.addEventListener("click", function () {
-                if (key.value == "" || key.value == "YOUR_BING_SPEECH_API_KEY") {
+                if (key.value == "" || key.value == "KEY") {
                     alert("Please enter your Bing Speech subscription key!");
                     return;
                 }
@@ -288,14 +375,14 @@
             });
 
             key.addEventListener("focus", function () {
-               if (key.value == "YOUR_BING_SPEECH_API_KEY") {
+               if (key.value == "KEY") {
                    key.value = "";
                }
             });
 
             key.addEventListener("focusout", function () {
                if (key.value == "") {
-                   key.value = "YOUR_BING_SPEECH_API_KEY";
+                   key.value = "KEY";
                }
             });
 
@@ -351,6 +438,9 @@
         function UpdateRecognizedPhrase(json) {
             hypothesisDiv.innerHTML = "";
             phraseDiv.innerHTML += json + "\n";
+            getName(json)
+            getAge(json)
+            getGender(json)
         }
 
         function OnComplete() {
@@ -358,49 +448,7 @@
             stopBtn.disabled = true;
         }
     </script>
+
 </body>
 </html>
-
-
-
-
-{# 
-<nav class="navbar navbar-inverse">
-  <div class="container-fluid">
-    <div class="navbar-header">
-      <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#myNavbar">
-        <span class="icon-bar"></span>
-        <span class="icon-bar"></span>
-        <span class="icon-bar"></span>                        
-      </button>
-    </div>
-    <div class="collapse navbar-collapse" id="myNavbar">
-      <ul class="nav navbar-nav">
-        <li><h3 style="color:#ffffff">Dont Waste Time</h3></li>
-      </ul>
-      <ul class="nav navbar-nav navbar-right">
-        <li><a href="#"><span class="glyphicon glyphicon-info"></span>About</a></li>
-      </ul>
-    </div>
-  </div>
-</nav>
-
-<div class="container-fluid text-center">
-  <div class="row content">
-
-    <div class="col-sm-2">
-        text
-    </div>
-    <div class="col-sm-2">
-        text
-    </div>
-  </div>
-</div>
-
-<footer class="container-fluid text-center">
-  <p>Created by <a href="https://github.com"></a></p>
-</footer>
- #}
-
-{% endblock %}
 
