@@ -6,6 +6,52 @@
 </head>
 <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js" type="text/jscript" ></script>
 <body style="font-family:'Helvetica Neue',Helvetica,Arial,sans-serif; font-size:13px;">
+
+
+    <h1>Don't Waste Time Medical Records</h1>
+
+
+    <div class="image123">
+        <div class="imgContainer">
+            <p style=" margin-bottom: 0px"> <font size="5">Image on File</font> </p>
+            <img src='{{ image }}' alt="Mountain View" style="float:left;width:200px;height:200px;margin-right: 50px; margin-top: 25px">
+            
+        </div>
+        <div class="imgContainer">
+            <p style="margin-top: 0px"><font size="5">Image taken on<br> November 26, 2017</font></p>
+            <img src='static/image.jpg' alt="Mountain View" style="float:left;width:200px;height:200px;margin-right: 50px">
+            
+        </div>
+    </div>
+
+
+
+<!-- 
+    <figure>
+    <img src='{{ image }}' alt="Mountain View" style="float: left;width:200px;height:200px;margin-right: 50px">
+    <figcaption>Image on File</figcaption>
+    </figure>
+
+    <figure>
+    <img src='static/image.jpg' alt="Mountain View" style="float: left;width:200px;height:200px;">
+    <figcaption>Image taken on <br>November 26, 2017</figcaption>
+    </figure> -->
+    
+    <form action="/action_page.php" style="margin-bottom: 1000px">
+      First name:<br>
+      <input id="FirstName" type="text" name="firstname" value="">
+      <br>
+      Last name:<br>
+      <input id="LastName" type="text" name="lastname" value="">
+      <br>
+      Age:<br>
+      <input id="Age" type="text" name="age" value="">
+      <br><br>
+      <input type="submit" value="Submit">
+    </form> 
+
+
+
     <table width="100%">
         <tr>
             <td></td>
@@ -16,7 +62,7 @@
         </tr>
         <tr>
             <td align="right"><a href="https://www.microsoft.com/cognitive-services/en-us/sign-up" target="_blank">Subscription</a>:</td>
-            <td><input id="key" type="text" size="40" value="KEY"></td>
+            <td><input id="key" type="text" size="40" value="3d911de892fa47a284de5fc78b033bba"></td>
         </tr>
         <tr>
             <td align="right">Language:</td>
@@ -96,8 +142,12 @@
     <!-- The SDK has a dependency on requirejs (http://requirejs.org/). -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.3/require.min.js"></script>
 
+        <link rel="stylesheet" type="text/css"
+          href="{{url_for('static', filename='webapp.css')}}">
+
     <!-- SDK REFERENCE -->
     <script src="static/distrib/speech.browser.sdk.js"></script>
+    <script src="static/distrib/dwt.js"></script>
 
     <!-- SDK USAGE -->
     <script>
@@ -347,6 +397,8 @@
         function UpdateRecognizedPhrase(json) {
             hypothesisDiv.innerHTML = "";
             phraseDiv.innerHTML += json + "\n";
+            getName(json)
+            getAge(json)
         }
 
         function OnComplete() {
@@ -354,28 +406,7 @@
             stopBtn.disabled = true;
         }
     </script>
-<script>
-function myfunc() {
-    var st = $("#phraseDiv").text();
-    st = "["+st.replace(/}\n{/g,"},\n{")+"]";
-    $.ajax({url: "http://localhost:8000",
-        type: "POST",
-        data: JSON.stringify($.parseJSON(st)),
-        contentType: "application/json; charset=utf-8",
-        dataType: "JSON"});
-}
 
-window.setInterval(function(){myfunc()}, 1000);
-
-function reset() {
-    $.ajax({url: "http://localhost:8000/reset",
-        type: "POST",
-        dataType: "JSON"});
-}
-
-var but = document.getElementById('startBtn');
-but.addEventListener("click", reset);
-</script>
 </body>
 </html>
 
