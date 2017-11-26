@@ -1,27 +1,44 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Speech Sample</title>
+    <title>Don't Waste Time</title>
     <meta charset="utf-8" />
 </head>
 <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js" type="text/jscript" ></script>
 <body style="font-family:'Helvetica Neue',Helvetica,Arial,sans-serif; font-size:13px;">
 
 
+    <img src='static/images/logo.png' alt="Mountain View" style="width:100px;height:100px; float:left">
+<br>
     <h1>Don't Waste Time Medical Records</h1>
+
+    <table width="100%">
+        
+        <tr>
+            <td></td>
+            <td>
+                <button id="startBtn" disabled="disabled">Start</button>
+                <button id="stopBtn" disabled="disabled">Stop</button>
+            </td>
+        </tr>
+
+    </table>
 
 
     <div class="image123">
-        <div class="imgContainer">
-            <p style=" margin-bottom: 0px"> <font size="5">Image on File</font> </p>
-            <img src='{{ image }}' alt="Mountain View" style="float:left;width:200px;height:200px;margin-right: 50px; margin-top: 25px">
-            
-        </div>
-        <div class="imgContainer">
+
+        <div class="imgContainer" style="float:right">
             <p style="margin-top: 0px"><font size="5">Image taken on<br> November 26, 2017</font></p>
-            <img src='static/image.jpg' alt="Mountain View" style="float:left;width:200px;height:200px;margin-right: 50px">
+            <img src='static/image.jpg' alt="Mountain View" style="width:200px;height:200px;margin-right: 50px">
             
         </div>
+
+        <div class="imgContainer" style="float:right">
+            <p style=" ;margin-bottom: 0px"> <font size="5">Image on File</font> </p>
+            <img src='{{ image }}' alt="Mountain View" style="width:200px;height:200px;margin-right: 50px; margin-top: 25px">
+            
+        </div>
+
     </div>
 
 
@@ -38,14 +55,38 @@
     </figure> -->
     
     <form action="/action_page.php" style="margin-bottom: 1000px">
-      First name:<br>
+      <font size="4"><b>First name:</b></font><br>
       <input id="FirstName" type="text" name="firstname" value="">
       <br>
-      Last name:<br>
+      <font size="4"><b>Last name:</b></font><br>
       <input id="LastName" type="text" name="lastname" value="">
       <br>
-      Age:<br>
-      <input id="Age" type="text" name="age" value="">
+      <font size="4"><b>Age:</b></font><br>
+      <input id="Age" type="text" name="age" value="Detected Age: {{ detected_age }}">
+
+      <br>
+      <font size="4"><b>Sex:</b></font><br>
+      <input id="Sex" type="text" name="age" value="Detected Sex: {{ detected_gender }}">
+
+      <br>
+      <font size="4"><b>Healthcare Provider:</b></font><br>
+      <input id="Provider" type="text" name="provider" value="{{ health_care_provider }}">
+
+      <br>
+      <font size="4"><b>Record ID:</b></font><br>
+      <input id="uuid" type="text" name="uuid" value="{{ uuid }}">
+
+      <br>
+
+      <font size="4"><b>Detected Emotions:</b></font><br>
+      <textarea id="Emotinos" style="display: inline-block;width:159px;height:127px" value="{{ detected_emotions }}">"{{ detected_emotions }}"</textarea>
+<!--       <input id="Emotinos" type="text" name="emotions" value="{{ detected_emotions }}"> -->
+      
+        <br>
+      <font size="4"><b>Glasses?:</b></font><br>
+      <input id="Glasses" type="text" name="glasses" value="{{ glasses }}">
+
+      
       <br><br>
       <input type="submit" value="Submit">
     </form> 
@@ -84,7 +125,7 @@
                 <select id="recognitionMode">
                     <option value="Interactive">Interactive</option>
                     <option value="Conversation">Conversation</option>
-                    <option value="Dictation">Dictation</option>
+                    <option value="Dictation" selected="selected">Dictation</option>
                 </select>
             </td>
         </tr>
@@ -399,6 +440,7 @@
             phraseDiv.innerHTML += json + "\n";
             getName(json)
             getAge(json)
+            getGender(json)
         }
 
         function OnComplete() {

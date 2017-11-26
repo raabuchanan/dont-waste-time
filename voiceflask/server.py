@@ -6,16 +6,23 @@ import time
 import numpy as np
 import cv2
 import argparse
+import operator
 import os
 
 
 subscription_id = '78836ad0eb164298ac473d98449a1c43'
 #subscription_id = '69766cdb74e748cd9266eb53fae6316f'
-image = "static/images/Abbott701_Norman373_771.jpg"
+image = "static/images/default.jpg"
 personGroupId = 'patients'
 
 our_database = []
 
+detected_emotions = {}
+glasses = ""
+detected_age = ""
+detected_gender = ""
+health_care_provider = ""
+uuid = ""
 
 class FaceMatcher:
 
@@ -90,7 +97,7 @@ class FaceMatcher:
 
 
     def analyze_image(self):
-        global image
+        global image, detected_emotions, glasses, detected_age, detected_gender, health_care_provider, uuid
         conn = httplib.HTTPSConnection('westeurope.api.cognitive.microsoft.com')
 
         params = urllib.urlencode({
@@ -114,14 +121,21 @@ class FaceMatcher:
             print(data)
         else:
             faceId = data[0]['faceId']
-            print(faceId)
+
+        detected_age = data[0]['faceAttributes']['age']
+        detected_gender = data[0]['faceAttributes']['gender']
+
+        glasses = data[0]['faceAttributes']['glasses']
+
+        detected_emotions = data[0]['faceAttributes']['emotion']
+
+        
 
         self.headers['Content-Type'] = 'application/json'
 
 
 
-        params = urllib.urlencode({
-        })
+        params = urllib.urlencode({})
 
         body = str({
 
@@ -138,7 +152,6 @@ class FaceMatcher:
 
         conn.close()
 
-        print("HERE")
         print(data)
         if(len(data[0]['candidates']) > 0):
 
@@ -162,11 +175,19 @@ class FaceMatcher:
 
                             image = "static/images/" + name + "1.jpg"
 
+                            health_care_provider = medical_data['entry'][0]['resource']['name']
+
+                            uuid = medical_data['entry'][0]['resource']['id']
+
         else:
             print("No Match")
 
 
+        if health_care_provider == "":
+            health_care_provider = "NO RECORD FOUND"
 
+        if uuid == "":
+            uuid = "NO RECORD FOUND"
 
 
 app = Flask(__name__, static_url_path='/static')
@@ -179,9 +200,10 @@ def search():
 
 @app.route("/", methods=['GET'])
 def home():
-    global image
+    global image, detected_emotions, glasses, detected_age, detected_gender, health_care_provider, uuid
     
-    return render_template("Sample.html", image=image)
+    return render_template("Sample.html", image=image, detected_emotions=detected_emotions, glasses=glasses,detected_age=detected_age,
+detected_gender=detected_gender,health_care_provider=health_care_provider, uuid=uuid)
 
 @app.route("/reset", methods=['POST'])
 def reset():
@@ -273,6 +295,6 @@ if __name__ == "__main__":
         matcher.analyze_image()
 
 
-        app.run(host='0.0.0.0', port=8000, debug=True)
+        app.run(host='0.0.0.0', port=80, debug=True)
 
 
